@@ -13,12 +13,15 @@ export default function SignupPage() {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const allowedDomain = process.env.NEXT_PUBLIC_SCHOOL_EMAIL_DOMAIN || "";
+  const allowedDomains = (process.env.NEXT_PUBLIC_SCHOOL_EMAIL_DOMAIN || "")
+    .split(",")
+    .map((d) => d.trim())
+    .filter(Boolean);
 
   const validate = () => {
     if (!email || !nickname || !password || !confirm) return "모든 항목을 입력해주세요.";
-    if (allowedDomain && !email.endsWith(`@${allowedDomain}`))
-      return `학교 이메일(@${allowedDomain})만 가입할 수 있습니다.`;
+    if (allowedDomains.length > 0 && !allowedDomains.some((d) => email.endsWith(`@${d}`)))
+      return `학교 이메일(${allowedDomains.map((d) => `@${d}`).join(" 또는 ")})만 가입할 수 있습니다.`;
     if (!email.includes("@")) return "올바른 이메일을 입력해주세요.";
     if (password.length < 6) return "비밀번호는 6자 이상이어야 합니다.";
     if (password !== confirm) return "비밀번호가 일치하지 않습니다.";
@@ -89,7 +92,7 @@ export default function SignupPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder={allowedDomain ? `example@${allowedDomain}` : "학교 이메일 주소"}
+              placeholder={allowedDomains.length > 0 ? `example@${allowedDomains[0]}` : "학교 이메일 주소"}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
             />
           </div>
